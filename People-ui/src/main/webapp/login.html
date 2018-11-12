@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <fieldset>
+        <legend>登录</legend>
+        <p>
+            <label>用户名:</label>
+            <input type="text" placeholder="请输入用户名" id="pname"/>
+        </p>
+        <p>
+            <label>密码:</label>
+            <input type="text" placeholder="请输入密码" id="ppassword"/>
+        </p>
+        <p>
+            <input type="button" value="登录" id="btnLogin"/>
+        </p>
+    </fieldset>
+    <script src="js/jquery-1.11.3.js"></script>
+    <script>
+        $("#btnLogin").click(function () {
+            var peopleList=new Array();
+            peopleList.push({
+                pname:$("#pname").val(),
+                ppassword:$("#ppassword").val()
+            });
+            $.ajax({
+                url:'PeopleServlet/login',
+                type:'post',
+                data: JSON.stringify(peopleList),
+                contentType:'application/json;charset=UTF-8',
+                success:function (result) {
+                    if(result=="登录成功!"){
+                        alert(result);
+                        location.href="main.html";
+                    }else{
+                        alert(result);$("#pname").val("");$("#ppassword").val("");
+                    }
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>

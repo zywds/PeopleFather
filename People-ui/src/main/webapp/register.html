@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<fieldset>
+    <legend>注册</legend>
+    <p>
+        <label>用户名:</label>
+        <input type="text" placeholder="请输入用户名" id="pname"/>
+    </p>
+    <p>
+        <label>电话号码:</label>
+        <input type="text" placeholder="请输入电话号码" id="pphone"/>
+    </p>
+    <p>
+        <label>邮箱:</label>
+        <input type="text" placeholder="请输入邮箱" id="pemail"/>
+    </p>
+    <p>
+        <label>密码:</label>
+        <input type="text" placeholder="请输入密码" id="ppassword"/>
+    </p>
+    <p>
+        <input type="button" value="注册" id="btnRegister"/>
+    </p>
+</fieldset>
+<script src="js/jquery-1.11.3.js"></script>
+<script>
+    $("#btnRegister").click(function () {
+        var peopleList=new Array();
+        peopleList.push({
+            pname:$("#pname").val(),
+            pphone:$("#pphone").val(),
+            pemail:$("#pemail").val(),
+            ppassword:$("#ppassword").val()
+        });
+        $.ajax({
+            url:'PeopleServlet/insertPeople',
+            type:'post',
+            data: JSON.stringify(peopleList),
+            contentType:'application/json;charset=UTF-8',
+            success:function (result) {
+                alert(result);
+                /*$("#pname").val("");$("#pphone").val("");$("#pemail").val("");
+                $("#ppassword").val("");*/
+                location.href="login.html";
+            }
+        });
+    })
+</script>
+</body>
+</html>

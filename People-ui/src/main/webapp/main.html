@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="js/layui/css/layui.css"/>
+</head>
+<style>
+    table,tr,td{border-collapse: collapse;border:1px solid red;}
+    table{width: 100%;text-align: center;}
+    thead tr{background: deepskyblue}
+    tbody tr:nth-child(2n-1){background: lightblue}
+</style>
+<body>
+    <p>
+        <form action="PeopleServlet/outxml" method="post"  enctype="multipart/form-data">
+            <input type="file" name="files"/>
+            <button>导入xml</button>
+        </form>
+    </p>
+    <p>
+        用户名:<input type="text" id="pnameIf" placeholder="请输入用户名"/>
+        手机号:<input type="text" id="pphoneIf" placeholder="请输入手机号"/>
+        邮箱:<input type="text" id="pemailIf" placeholder="请输入邮箱"/>
+        <input type="button" value="搜索" id="btnSearch"/>
+        <a href="PeopleServlet/joinxml">导出xml</a>
+    </p>
+    <!--分页-->
+    <div id="demo11"></div>
+    <table>
+        <thead>
+        <tr>
+            <td>编号</td>
+            <td>用户名</td>
+            <td>手机号</td>
+            <td>邮箱</td>
+            <td>注册日期</td>
+            <td>操作</td>
+        </tr>
+        </thead>
+        <tbody id="tbodyShow">
+
+        </tbody>
+    </table>
+    <fieldset>
+        <legend>修改</legend>
+        <p>
+            <label>用户名:</label>
+            <input type="text" placeholder="请输入用户名" id="pname"/><br>
+        </p>
+        <p>
+            <label>电话号码:</label>
+            <input type="text" placeholder="请输入电话号码" id="pphone"/><br>
+        </p>
+        <p>
+            <label>邮箱:</label>
+            <input type="text" placeholder="请输入邮箱" id="pemail"/><br>
+        </p>
+        <p>
+            <input type="button" value="修改" id="btnUpdate"/>
+        </p>
+    </fieldset>
+    <script src="js/jquery-1.11.3.js"></script>
+    <script src="js/layui/layui.all.js"></script>
+    <script>
+        var updateid="";
+        /*分页*/
+        var pages="";var limits="";
+        layui.use(['laypage', 'layer'], function() {
+            var laypage = layui.laypage
+                , layer = layui.layer;
+
+            //分页方法
+            function selectPage() {
+                /*查询所有*/
+                var number = "";
+                var objectList = [];
+                var pname = $("#pnameIf").val();
+                var pphone = $("#pphoneIf").val();
+                var pemail = $("#pemailIf").val();
+                objectList.push(pname);
+                objectList.push(pphone);
+                objectList.push(pemail);
+                $.ajax({
+                    url: 'PeopleServlet/selectPeopleCount',
+                    type: 'post',
+                    data: JSON.stringify(objectList),
+                    contentType: 'application/json;charset=UTF-8',
+                    success: function (result) {
+                        number = result;
+                        /*分页查询*/
+                        laypage.render({
+                            elem: 'demo11'
+                            , count: number //数据总数
+                            , limit: 4
+                            , curr: pages
+                            , jump: function (objs) {
+                                page = objs.curr;
+                                limit = objs.limit;
+                                var integerList = [];
+                                integerList.push(pname);
+                                integerList.push(pphone);
+                                integerList.push(pemail);
+                                integerList.push(page);
+                                integerList.push(limit);
+                                /*得到返回结果*/
+                                /*先清除数据*/
+                                $("#tbodyShow tr").remove();
+                                $.ajax({
+                                    type: 'post',
+                                    url: 'PeopleServlet/selectPeoplePageByIf',
+                                    data: JSON.stringify(integerList),
+                                    contentType: 'application/json;charset=UTF-8',
+                                    beforeSend: function () {
+                                        console.log(integerList);
+                                    },
+                                    success: function (result) {
+                                        $.each(result, function (i, obj) {
+                                            $("<tr/>")
+                                                .append($("<td/>").html(obj.pid))
+                                                .append($("<td/>").html(obj.pname))
+                                                .append($("<td/>").html(obj.pphone))
+                                                .append($("<td/>").html(obj.pemail))
+                                                .append($("<td/>").html(new Date(obj.ptime).toLocaleString()))
+                                                .append($("<input type='button' value='删除' class='btnDel'/>").data("obj", obj.pid))
+                                                .append($("<input type='button' value='编辑' class='btnEdit'/>").data("obj", obj))
+                                                .append($("<input type='button' value='重置' class='btnRePassword'/>").data("obj", obj.pid))
+                                                .appendTo($("#tbodyShow"));
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            };
+            var app={
+                /*删除*/
+                del:function(obj){
+                    if(confirm("是否要删除?")) {
+                        var pid = obj;
+                        $.ajax({
+                            url: 'PeopleServlet/deletePeople',
+                            type: 'post',
+                            data: JSON.stringify(pid),
+                            //data: {"pid": pid},
+                            contentType:'application/json;charset=UTF-8',
+                            success: function (result) {
+                                alert(result);
+                                selectPage();
+                            }
+                        });
+                    }
+                },
+                /*修改*/
+                update:function(){
+                    var peopleList=new Array();
+                    peopleList.push({
+                        pname: $("#pname").val(),
+                        pphone:$("#pphone").val(),
+                        pemail:$("#pemail").val(),
+                        pid:updateid
+                    });
+                    $.ajax({
+                        url:'PeopleServlet/updatePeople',
+                        type:'post',
+                        data: JSON.stringify(peopleList),
+                        contentType:'application/json;charset=UTF-8',
+                        success:function (result) {
+                            alert(result);selectPage();
+                            $("#pname").val("");$("#pphone").val("");
+                            $("#pemail").val("");updateid="";
+                        }
+                    });
+                },
+                /*重置密码*/
+                rePassword:function(obj){
+                    var pid=obj;
+                    $.ajax({
+                        url:'PeopleServlet/updatePassword',
+                        type:'post',
+                        data:JSON.stringify(pid),
+                        contentType:'application/json;charset=UTF-8',
+                        success:function (result) {
+                            alert(result);
+                        }
+                    });
+                },
+                /*点击事件*/
+                clicks:function(){
+                    $("#tbodyShow").on("click",".btnRePassword",function () {
+                       var pid=$(this).data("obj");
+                       app.rePassword(pid);
+                    });
+                    $("#tbodyShow").on("click",".btnDel",function () {
+                        var pid=$(this).data("obj");
+                        app.del(pid);
+                    });
+                    $("#tbodyShow").on("click",".btnEdit",function () {
+                        var obj=$(this).data("obj");
+                        updateid=obj.pid;
+                        $("#pname").val(obj.pname);
+                        $("#pphone").val(obj.pphone);
+                        $("#pemail").val(obj.pemail);
+                    });
+                    $("#btnUpdate").click(function () {
+                        app.update();
+                    });
+                    /*多条件查询*/
+                    $("#btnSearch").click(function () {
+                        selectPage();
+                    });
+                },
+                init:function () {
+                    selectPage();
+                    app.clicks();
+                }
+            };
+            app.init();
+        });
+
+    </script>
+</body>
+</html>

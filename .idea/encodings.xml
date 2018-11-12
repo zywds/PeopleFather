@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/People-commoms" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/People-commons" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/People-dao" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/People-entities" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/People-services" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/People-ui" charset="UTF-8" />
+  </component>
+</project>
